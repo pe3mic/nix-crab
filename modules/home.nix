@@ -93,9 +93,12 @@
       || ${pkgs.procps}/bin/pgrep -x steamwebhelper >/dev/null 2>&1; then
       INJECTION="none"
       LD=""
+      # The subshell keeps the redirect-failure noise of root-owned
+      # /proc/*/environ entries (bash prints those regardless of the
+      # command's own 2>/dev/null) out of the output.
       for p in /proc/[0-9]*/environ; do
         [ -r "$p" ] || continue
-        LD="$(tr '\0' '\n' < "$p" 2>/dev/null | grep -m1 '^LD_AUDIT=' || true)"
+        LD="$( (tr '\0' '\n' < "$p") 2>/dev/null | grep -m1 '^LD_AUDIT=' || true)"
         [ -n "$LD" ] && break
       done
       case "$LD" in
@@ -328,6 +331,23 @@ in {
     # file keep their changes across home-manager switches.
     xdg.configFile."SLSsteam/config.yaml".enable =
       config.programs.nix-crab.slssteam.manageConfig;
+
+    # A fresh machine has no config.yaml at all, and SLSsteam then runs
+    # without any of its keys (notifies "Config loading errors" on every
+    # start; DisableCloud defaults off so CloudRedirect reports Disabled).
+    # Seed the file ONCE from the typed module's generated config -- seeded,
+    # never managed: later switches leave it alone, so SteaMidra and
+    # hand-edits keep their changes. Same trade-off as ACCELA.conf.
+    home.activation.seedSlssteamConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      slssteamConf="$HOME/.config/SLSsteam/config.yaml"
+      if [ ! -e "$slssteamConf" ]; then
+        run mkdir -p "$(dirname "$slssteamConf")"
+        run install -m 644 ${
+          config.xdg.configFile."SLSsteam/config.yaml".source
+        } "$slssteamConf"
+        echo "nix-crab: seeded SLSsteam config to $slssteamConf"
+      fi
+    '';
 
     home.file = {
       ".config/SLSsteam/tools/netsock/netsock.so".source = steamnetsock;
