@@ -2,9 +2,9 @@
   description = "Flake for h3adcr-b on NixOS";
 
   nixConfig = {
-    extra-substituters = ["https://matrix.cachix.org"];
+    extra-substituters = ["https://at3mic.cachix.org"];
     extra-trusted-public-keys = [
-      "matrix.cachix.org-1:uZWavEIj0/oIRHPjh+OG586y4nXBlyI0xkYfZBfDx7w="
+      "at3mic.cachix.org-1:nrHEb10UDTgmmmvqaPdYt0RkF0mgcyCksUXaX7fIEHY="
     ];
   };
 

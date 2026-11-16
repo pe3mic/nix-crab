@@ -44,14 +44,14 @@ endpoint.
 
 ### Binary cache and CI
 
-Builds use the public `matrix` Cachix cache. To enable it in a consuming NixOS
+Builds use the `at3mic` Cachix cache. To enable it in a consuming NixOS
 configuration, add:
 
 ```nix
 nix.settings = {
-  extra-substituters = ["https://matrix.cachix.org"];
+  extra-substituters = ["https://at3mic.cachix.org"];
   extra-trusted-public-keys = [
-    "matrix.cachix.org-1:uZWavEIj0/oIRHPjh+OG586y4nXBlyI0xkYfZBfDx7w="
+    "at3mic.cachix.org-1:nrHEb10UDTgmmmvqaPdYt0RkF0mgcyCksUXaX7fIEHY="
   ];
 };
 ```
@@ -63,8 +63,8 @@ and Home Manager profiles with the optional tools and both LuaTools launch modes
 They build activation packages without activating them or launching Steam.
 
 Every pull request runs the `Nix build` check. Repository builds upload new store
-paths to `matrix` using the `CACHIX_AUTH_TOKEN` Actions secret, which must contain
-a write token for that cache. Fork pull requests read the public cache without
+paths to `at3mic` using the `CACHIX_AUTH_TOKEN` Actions secret, which must contain
+a write token for that cache. Fork pull requests read the cache without
 uploading. Protect `main` by requiring pull requests and the successful `Nix build`
 check, including for administrators; force pushes and branch deletion are blocked.
 The weekly lock updater opens a pull request, explicitly dispatches its build,

@@ -23,7 +23,7 @@ Modules are partial applications: `flake.nix` threads flake inputs in via `(impo
 
 ## Verification
 
-- `nix flake check --accept-flake-config --no-write-lock-file` in repo root — evaluates and builds the NixOS Steam variants and Home Manager activation packages in `checks.nix`, using the `matrix` Cachix cache. Add `--no-build` for evaluation only.
+- `nix flake check --accept-flake-config --no-write-lock-file --no-build` in repo root — evaluates the NixOS Steam variants and Home Manager activation packages in `checks.nix` (substitutes come from the `at3mic` Cachix cache). **Do not run `nix flake check` without `--no-build`**: full builds take a very long time and the user explicitly banned them; CI builds the checks, not this session.
 - Test harness at `/tmp/opencode/nixcrab-test` (out-of-repo): a flake with `nixosSystem` importing `nixosModules.default` + `homeManagerConfiguration` importing `homeModules.default`. Used to actually evaluate/build both sides (needs `nixpkgs.config.allowUnfree = true` for steam). Re-lock after changing the repo (`rm flake.lock && nix flake lock`), otherwise you get `NAR hash mismatch` for the path input.
 - Deep home-manager evals (`config.home-manager.users.<u>.<attr>`) can trip a benign upstream `accounts.calendar.basePath` error; don't chase it.
 
