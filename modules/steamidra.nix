@@ -31,7 +31,7 @@
       tmp=$(mktemp -d)
       trap 'rm -rf "$tmp"' EXIT
       ${pkgs.curl}/bin/curl -fL --progress-bar -o "$tmp/sff.zip" \
-        "https://github.com/Midrags/SFF/releases/download/v${version}/SteaMidra-${version}-linux.zip"
+        "https://github.com/drappula/SFF/releases/download/v${version}/SteaMidra-${version}-linux.zip"
       ${pkgs.unzip}/bin/unzip -qo "$tmp/sff.zip" "SteaMidra*.AppImage" "*.png" -d "$tmp"
       mkdir -p "${dataDir}"
       mv "$tmp"/SteaMidra*.AppImage "$app"

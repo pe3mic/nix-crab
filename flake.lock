@@ -218,13 +218,13 @@
     "steamidra": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-UwrSDHRqmUKb6LyJ6cxusF3HbQjfueswbtvE1akpvw4=",
+        "narHash": "sha256-3phVAc5244VB49xvGO5+QppZ9smZhjv0/CH18jiulpc=",
         "type": "file",
-        "url": "https://api.github.com/repos/Midrags/SFF/tags"
+        "url": "https://api.github.com/repos/drappula/SFF/tags"
       },
       "original": {
         "type": "file",
-        "url": "https://api.github.com/repos/Midrags/SFF/tags"
+        "url": "https://api.github.com/repos/drappula/SFF/tags"
       }
     },
     "steamnetsock": {

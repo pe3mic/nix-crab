@@ -61,7 +61,7 @@
       # counters, so its narHash changes within the hour and every eval after
       # the tarball TTL dies with a narHash mismatch. /tags only changes when a
       # new tag is pushed. `nix flake update` follows the newest release.
-      url = "https://api.github.com/repos/Midrags/SFF/tags";
+      url = "https://api.github.com/repos/drappula/SFF/tags";
       flake = false;
     };
   };

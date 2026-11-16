@@ -263,7 +263,7 @@ home module for the final status line; without it the rest still runs.
 
 ## SteaMidra (optional GUI)
 
-If you want to use [SteaMidra (SFF)](https://github.com/Midrags/SFF) to manage Steam accounts, tokens and settings:
+If you want to use [SteaMidra (SFF)](https://github.com/drappula/SFF) to manage Steam accounts, tokens and settings:
 
 ```nix
 programs.nix-crab.steamidra.enable = true;
@@ -459,7 +459,7 @@ Project Credits:
 
 - **[SLSsteam](https://github.com/AceSLS/SLSsteam)** (by AceSLS) — for the incredible Steam injection capability.
 - **[CloudRedirect](https://github.com/swwayps/cloudredirect-moon)** (by Selectively11) — for the reliable cloud save syncing.
-- **[SteaMidra (SFF)](https://github.com/Midrags/SFF)** (by Midrags) — for the powerful configuration and account manager.
+- **[SteaMidra (SFF)](https://github.com/drappula/SFF)** (fork of Midrags/SFF) — for the powerful configuration and account manager.
 - **[steamnetsock-patch](https://github.com/yesyes0649/steamnetsock-patch)** (by yesyes0649) — for the multiplayer fixes.
 - **[Millennium](https://github.com/SteamClientHomebrew/Millennium)** (by Steam Homebrew) — for the client themes and plugins, and for shipping its own Nix package.
 - **[slsteam-moon](https://github.com/swwayps/slsteam-moon), [Lumen](https://github.com/swwayps/lumen) and the [LuaTools port](https://github.com/swwayps/luatools-moon)** (by swwayps) — for keeping the LuaTools workflow alive on Linux.
