@@ -10,6 +10,14 @@
   config,
   ...
 }: let
+  # The prebuilt .so at the moon-fork repo root is 32-bit (downgraded-client
+  # era); the current 64-bit client gets a hook built from the same source.
+  # Same nixpkgs as the NixOS side via follows, so one identical store path.
+  cloudredirect64 = import ./cloudredirect-64.nix {
+    inherit pkgs;
+    src = cloudredirect-moon;
+  };
+
   cloudredirectCli = pkgs.stdenv.mkDerivation {
     pname = "cloud_redirect_cli";
     version = "0.0.0";
@@ -40,13 +48,14 @@
     LUMEN_DIR="$HOME/.local/share/Lumen"
     CRLINK="$HOME/.local/share/CloudRedirect/cloud_redirect.so"
 
-    # Both CloudRedirect hooks are store paths known at Nix build time.
-    # Resolve the ~/.local/share link against them to report which one is
-    # actually wired up (the home link mirrors the LD_PRELOAD choice).
-    # Upstream is a `type = "file"` input (the .so itself); moon is a git
-    # input with the .so at the repo root.
+    # All CloudRedirect hook variants are store paths known at Nix build
+    # time. Resolve the ~/.local/share link against them to report which one
+    # is actually wired up (the home link mirrors the LD_PRELOAD choice).
+    # The prebuilt repo-root .so is 32-bit (downgraded-client era); the
+    # 64-bit build comes from modules/cloudredirect-64.nix.
     CR_UP="${cloudredirect}"
     CR_MOON="${cloudredirect-moon}/cloud_redirect.so"
+    CR_64="${cloudredirect64}/cloud_redirect.so"
     # Both SteaMidra and the sls-steam typed module can append their own flat
     # key block to config.yaml. So always read the last occurrence.
     val() { grep "^$1:" "$CFG" | tail -1 | awk '{print $2}'; }
@@ -131,6 +140,7 @@
     if [ -e "$CRLINK" ]; then
       CR_TARGET="$(readlink -f "$CRLINK" 2>/dev/null || true)"
       case "$CR_TARGET" in
+        "$CR_64")   CR_HOOK="64-bit build" ;;
         "$CR_MOON") CR_HOOK="moon (LuaTools)" ;;
         "$CR_UP")   CR_HOOK="upstream" ;;
         *)          CR_HOOK="other: $CR_TARGET" ;;
@@ -355,7 +365,7 @@ in {
       ".local/share/CloudRedirect/cloud_redirect.so".source =
         if config.programs.nix-crab.cloudredirect.moon.enable
         then "${cloudredirect-moon}/cloud_redirect.so"
-        else cloudredirect;
+        else "${cloudredirect64}/cloud_redirect.so";
     };
 
     home.packages = [cloudredirectCli nixCrabStatus nixCrabUpdate];

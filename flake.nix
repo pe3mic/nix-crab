@@ -83,6 +83,10 @@
     steamidra,
     steamnetsock,
   }: let
+    # Prebuilt 32-bit hook + CLI, committed at the moon-fork repo root.
+    # Used only by the moon.enable path (downgraded 32-bit client / LuaTools);
+    # the default hook is built 64-bit from the same source in
+    # modules/cloudredirect-64.nix.
     cloudredirect = "${cloudredirect-moon}/cloud_redirect.so";
     cloudredirect-cli = "${cloudredirect-moon}/cloud_redirect_cli";
   in {
