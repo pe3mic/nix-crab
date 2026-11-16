@@ -58,24 +58,35 @@
     then slsteamMoon
     else upstream;
 
+  # Both forks ship their audit objects under one store path, so the choice
+  # is one derivation, not two branches of wiring. The artefact lists differ:
+  # upstream merged library-inject.so into SLSsteam.so (single audit object,
+  # current setup.sh), the moon fork still builds and needs the pair.
+  slsArtefacts =
+    if cfg.slssteam-moon.enable
+    then ["library-inject.so" "SLSsteam.so"]
+    else ["SLSsteam.so"];
+
   # The audit objects carry a RUNPATH onto a glibc that is not the one Steam's
   # FHS env loads (upstream's prebuilts onto their own glibc/libstdc++, the
   # moon build onto the 32-bit toolchain's). Steam's FHS already has a 32-bit
   # libc loaded, and the loader honours that RUNPATH: a second libc.so.6 ends
   # up in the same 32-bit process. The canary is then written by one libc and
   # verified by the other, so every 32-bit program dies with "*** stack
-  # smashing detected ***". Dropping the RUNPATH makes the loader reuse the
-  # already-loaded libc; the direct NEEDED (openssl, curl) stay reachable
-  # through the store paths baked in by the build.
-  sls = pkgs.runCommand "SLSsteam-audit" {
+  # smashing detected ***". Upstream's own nix build now strips the RUNPATH
+  # too (postFixup); doing it here keeps the moon build in the same shape.
+  # The store name mirrors the fork so nix-crab-status can read the injected
+  # fork out of the live LD_AUDIT path.
+  sls = pkgs.runCommand (lib.optionalString cfg.slssteam-moon.enable "slsteam-moon-audit"
+    + lib.optionalString (!cfg.slssteam-moon.enable) "sls-steam-audit") {
     nativeBuildInputs = [pkgs.patchelf];
   } ''
     mkdir -p "$out"
-    cp ${slsRaw}/library-inject.so "$out/"
-    cp ${slsRaw}/SLSsteam.so "$out/"
-    chmod u+w "$out"/*.so
-    patchelf --remove-rpath "$out/library-inject.so"
-    patchelf --remove-rpath "$out/SLSsteam.so"
+    ${lib.concatMapStringsSep "\n" (f: ''
+      cp ${slsRaw}/${f} "$out/${f}"
+      chmod u+w "$out/${f}"
+      patchelf --remove-rpath "$out/${f}"
+    '') slsArtefacts}
   '';
 in {
   options.programs.nix-crab = {
@@ -100,7 +111,8 @@ in {
       package = pkgs.steam.override {
         extraEnv =
           {
-            LD_AUDIT = "${sls}/library-inject.so:${sls}/SLSsteam.so";
+            LD_AUDIT =
+              lib.concatStringsSep ":" (map (f: "${sls}/${f}") slsArtefacts);
           }
           // cfg.slssteam.extraEnv;
         # The FHS wrapper never binds /sys: bubblewrap starts with a fresh
