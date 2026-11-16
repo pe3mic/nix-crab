@@ -77,6 +77,23 @@
   # too (postFixup); doing it here keeps the moon build in the same shape.
   # The store name mirrors the fork so nix-crab-status can read the injected
   # fork out of the live LD_AUDIT path.
+  # Libraries the audit objects must resolve against. Both must never see a
+  # second libc: glibc is deliberately absent from this path, libc.so.6 keeps
+  # coming from the already-loaded FHS one.
+  auditRpath = lib.makeLibraryPath
+    (lib.optionals cfg.slssteam-moon.enable [
+      # The moon audit is a 32-bit build.
+      pkgs.pkgsi686Linux.curl
+      pkgs.pkgsi686Linux.openssl
+      pkgs.pkgsi686Linux.dbus
+      pkgs.pkgsi686Linux.stdenv.cc.cc.lib
+    ] ++ lib.optionals (!cfg.slssteam-moon.enable) [
+      # Upstream's nix build is 64-bit.
+      pkgs.curl
+      pkgs.dbus
+      pkgs.stdenv.cc.cc.lib
+    ]);
+
   sls = pkgs.runCommand (lib.optionalString cfg.slssteam-moon.enable "slsteam-moon-audit"
     + lib.optionalString (!cfg.slssteam-moon.enable) "sls-steam-audit") {
     nativeBuildInputs = [pkgs.patchelf];
@@ -85,7 +102,14 @@
     ${lib.concatMapStringsSep "\n" (f: ''
       cp ${slsRaw}/${f} "$out/${f}"
       chmod u+w "$out/${f}"
-      patchelf --remove-rpath "$out/${f}"
+      # Upstream strips the RUNPATH (its distro installs use the system
+      # curl); left to the default search paths here, the loader picks the
+      # libcurl bundled in Steam's rootfs, which lacks the CURL_OPENSSL_4
+      # version tag the object needs, and ld.so silently drops the whole
+      # audit object. Restore an explicit RUNPATH onto nixpkgs' libraries
+      # instead: same nixpkgs as the FHS, so no version mixing, and libcurl
+      # is built against OpenSSL 3.
+      patchelf --set-rpath "${auditRpath}" "$out/${f}"
     '') slsArtefacts}
   '';
 in {
