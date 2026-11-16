@@ -36,7 +36,13 @@
       mkdir -p "${dataDir}"
       mv "$tmp"/SteaMidra*.AppImage "$app"
       chmod +x "$app"
-      mv "$tmp"/*.png "${dataDir}/steamidra.png"
+      # Pick the first png only: a second asset would make the glob a
+      # multi-arg mv onto a filename, which fails -- and with .version not yet
+      # written, every launch would re-download the 478 MiB zip and die again.
+      for png in "$tmp"/*.png; do
+        mv "$png" "${dataDir}/steamidra.png"
+        break
+      done
       echo "${version}" > "${dataDir}/.version"
       ${pkgs.libnotify}/bin/notify-send -a SteaMidra "SteaMidra ${version} ready" || true
     fi

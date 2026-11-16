@@ -47,7 +47,8 @@
     # input with the .so at the repo root.
     CR_UP="${cloudredirect}"
     CR_MOON="${cloudredirect-moon}/cloud_redirect.so"
-    # flat key block to config.yaml. So always read the last occurrence.
+    # Both SteaMidra and the sls-steam typed module can append their own flat
+    # key block to config.yaml. So always read the last occurrence.
     val() { grep "^$1:" "$CFG" | tail -1 | awk '{print $2}'; }
 
     json_escape() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }

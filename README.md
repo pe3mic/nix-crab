@@ -56,7 +56,11 @@ nix.settings = {
 };
 ```
 
-The flake also advertises these settings for standalone commands. Run
+The flake also advertises these settings for standalone commands. Note that
+Nix only honours a flake's `nixConfig` for trusted users -- on hosts where you
+are not in `trusted-users`, the substituter above is ignored (you will see
+"ignoring untrusted substituter" warnings) and the snippet in
+`nix.settings` is what actually wires the cache in. Run
 `nix flake check --accept-flake-config --no-write-lock-file` to build the checks
 locally. The checks build the upstream, moon and Millennium Steam configurations,
 and Home Manager profiles with the optional tools and both LuaTools launch modes.
